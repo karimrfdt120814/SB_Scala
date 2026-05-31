@@ -54,6 +54,14 @@ object functions {
 
   println(square(10,sqr))
 
+  def add1(a:Int,b:Int):Int={a+b}
+
+  val add10 = add1(_:Int,10)
+
+  println(add10(5))
+
+
+
 }
 
 
