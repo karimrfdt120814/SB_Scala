@@ -27,7 +27,17 @@ object rddOperations {
     val subRdd = input.subtract(input1).collect()
     val cartesianRdd = input.cartesian(input).collect()
 
-    cartesianRdd.foreach(println)
+   // cartesianRdd.foreach(println)
+
+    val colors = List((1,"Red"),(2,"Blue"),(3,"Purple"),(4,"Green"))
+    val colorRdd = sc.parallelize(colors)
+
+    val fruits = List((1,"Apple"),(2,"BlueBerries"),(7,"Mangoes"),(4,"Grapes"))
+    val furitRdd = sc.parallelize(fruits)
+
+    val joinedRdd =colorRdd.fullOuterJoin(furitRdd)
+
+    joinedRdd.collect.foreach(println)
 
 
 
