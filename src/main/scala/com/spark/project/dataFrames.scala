@@ -15,7 +15,7 @@ object dataFrames {
     val df=spark.read
       .format("csv")
       .option("header","true")
-      .option("path","C:C:\\Users\\Asus\\Downloads/details-2026-04-05.csv")
+      .option("path","C:\\Users\\Asus\\Downloads/details-2026-04-05.csv")
       .load()
 
     df.show(5,false)
