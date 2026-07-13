@@ -156,6 +156,176 @@ object whenAndOtherwiseProbs {
     /* How would you add a new column season with values "Summer" if order_date is in June,
     July, or August, "Winter" if in December, January, or February, and "Other" otherwise? */
 
+    val orders = List(
+      (1, "2024-07-01"),
+      (2, "2024-12-01"),
+      (3, "2024-05-01")
+    ).toDF("order_id", "order_date")
+
+    orders.select(
+      col("order_id"),
+      col("order_date"),
+      when(date_format(to_date(col("order_date"),"yyyy-MM-dd"),"MMMM").isin("June","July","August"),"Summer")
+        .when(date_format(to_date(col("order_date"),"yyyy-MM-dd"),"MMMM").isin("December","January","February"),"Winter")
+        .otherwise("Other").alias("Season")
+    ).show(false)
+
+    /*
+    Question: How would you add a new column discount with values 0 if amount is less than 200, 10 if
+    amount is between 200 and 1000, and 20 if amount is greater than 1000
+     */
+
+    val sales = List(
+      (1, 100),
+      (2, 1500),
+      (3, 300)
+    ).toDF("sale_id", "amount")
+
+    sales.select(
+      col("sale_id"),
+      col("amount"),
+      when(col("amount")<200,lit(0))
+        .when(col("amount").between(200,1000),lit(10))
+        .when(col("amount")>1000,lit(20))
+        .otherwise(null)
+        .alias("discount")
+    ).show(false)
+
+   /* Question: How would you add a new column is_morning which is true if login_time is before 12:00,
+    and false otherwise? */
+
+    val logins = List(
+      (1, "09:00"),
+      (2, "18:30"),
+      (3, "14:00")
+    ).toDF("login_id", "login_time")
+
+
+//    logins.select(
+//      col("login_id"),
+//      col("login_time"),
+//      (to_timestamp(col("login_time"), "HH:mm") < to_timestamp(lit("12:00"), "HH:mm"))
+//        .alias("is_morning")
+//    ).show(false)
+
+    logins.select(
+      col("login_id"),
+      col("login_time"),
+      when((to_timestamp(col("login_time"),"HH:mm" ) < to_timestamp(lit("12:00"), "HH:mm")),true)
+        .otherwise(false)
+        .alias("is_morning")
+
+    ).show(false)
+
+    /*
+    Question: How would you add a new column category with values "Young & Low Salary" if age is less
+than 30 and salary is less than 35000, "Middle Aged & Medium Salary" if age is between 30 and 40
+and salary is between 35000 and 45000, and "Old & High Salary" otherwise?
+     */
+
+    val employee = List(
+      (1, 25, 30000),
+      (2, 45, 50000),
+      (3, 35, 40000)
+    ).toDF("employee_id", "age", "salary")
+
+    employee.select(
+      col("employee_id"),
+      col("age"),
+      col("salary"),
+      when(col("age") < 30 && col("salary") < 35000,"Young & Low Salary")
+        .when(col("age").between(30,40) && col("salary").between(35000,45000),"Middle Aged & Medium Salary")
+        .otherwise("Old & High Salary")
+        .alias("category")
+    ).show(false)
+
+    /*
+    Question: How would you add two new columns, feedback with values "Bad" if rating is less than 3,
+"Good" if rating is 3 or 4, and "Excellent" if rating is 5, and is_positive with values true if rating is
+greater than or equal to 3, and false otherwise?
+     */
+
+    val reviews = List(
+      (1, 1),
+      (2, 4),
+      (3, 5),
+      (4,6)
+    ).toDF("review_id", "rating")
+
+    reviews.select(
+      col("review_id"),
+      col("rating"),
+      when(col("rating")<3,"Bad")
+        .when(col("rating").isin(3,4),"Good")
+        .when(col("rating")===5,"Excellent").otherwise("Invalid_rating").alias("feedback"),
+      when(col("rating")>=3,true)
+        .otherwise(false).alias("is_positive")
+    ).show(false)
+
+    /*
+    How would you add a new column content_category with values "Animal Related" if
+    content contains "fox", "Placeholder Text" if content contains "Lorem", and "Tech Related" if content
+    contains "Spark"?
+     */
+
+    val documents = List(
+      (1, "The quick brown fox"),
+      (2, "Lorem ipsum dolor sit amet"),
+      (3, "Spark is a unified analytics engine")
+    ).toDF("doc_id", "content")
+
+    documents.select(
+      col("doc_id"),
+      col("content"),
+      when(col("content").contains("fox"),"Animal Related")
+        .when(col("content").contains("Lorem"),"Placeholder Text")
+        .when(col("content").contains("Spark"),"Tech Related")
+        .otherwise("not a valid content")
+        .alias("content_category")
+    ).show(false)
+
+    /*
+    Question: How would you add a new column task_duration which is "Short" if the difference
+    between end_date and start_date is less than 7 days, "Medium" if it is between 7 and 14 days, and
+    "Long" otherwise?
+     */
+
+    val tasks = List(
+      (1, "2024-07-01", "2024-07-10"),
+      (2, "2024-08-01", "2024-08-15"),
+      (3, "2024-09-01", "2024-09-05")
+    ).toDF("task_id", "start_date", "end_date")
+
+
+//    tasks.select(
+//      col("task_id"),
+//      col("start_date"),
+//      col("end_date"),
+//      when(date_format(to_date(col("end_date")),"yyyy-MM-dd")-date_format(to_date(col("start_date")),"yyyy-MM-dd")<7,"Short")
+//        .when(date_format(to_date(col("end_date")),"yyyy-MM-dd")-date_format(to_date(col("start_date")),"yyyy-MM-dd").between(7,14),"Medium")
+//        .otherwise("Long")
+//        .alias("task_duration")
+//    ).show(false)
+
+    tasks.select(
+      col("task_id"),
+      col("start_date"),
+      col("end_date"),
+      when(
+        datediff(to_date(col("end_date")), to_date(col("start_date"))) < 7,
+        "Short"
+      ).when(
+          datediff(to_date(col("end_date")), to_date(col("start_date"))).between(7, 14),
+          "Medium"
+        ).otherwise("Long")
+        .alias("task_duration")
+    ).show(false)
+
+
+
+
+
+
 
   }
 
