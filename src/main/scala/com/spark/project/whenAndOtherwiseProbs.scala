@@ -322,6 +322,56 @@ greater than or equal to 3, and false otherwise?
     ).show(false)
 
 
+    val students = List(
+      (1,"Alice",92,"Math"),
+      (2,"Bob",85,"Math"),
+      (3,"Carol",77,"Science"),
+      (4,"Dave",65,"Science"),
+      (5,"Eve",50,"Math"),
+      (6,"Frank",82,"Science")
+      ).toDF("student_id","name","score","subject")
+
+    /*
+     Create a new column grade based on the score:
+ 'A' if score >= 90
+ 'B' if 80 <= score < 90
+ 'C' if 70 <= score < 80
+ 'D' if 60 <= score < 70
+ 'F' if score < 60
+
+   Calculate the average score per subject.
+ Find the maximum and minimum score per subject.
+ Count the number of students in each grade category per subject.
+
+
+     */
+
+  val count=  students.select(
+      col("student_id"),
+      col("name"),
+      col("score"),
+      col("subject"),
+      when(col("score") > 90,"A")
+        .when(col("score")<=90 && col("score")>80,'B')
+        .when(col("score")<=80 && col("score")>70,"C")
+        .when(col("score")<=70 && col("score")>60,"D")
+        .when(col("score")<60,"F")
+        .otherwise("Not a valid grade")
+        .alias("Grade")
+            ).groupBy("Grade").count()
+
+
+    //Calculate the average score per subject.
+
+    students.groupBy("subject")
+      .agg(avg("score").alias("avg_score")).show(false)
+
+
+// Find the maximum and minimum score per subject.
+
+    students.groupBy("subject")
+      .agg(max("score").alias("max_score"),min("score").alias("min_score")).show(false)
+
 
 
 
